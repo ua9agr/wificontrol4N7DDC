@@ -1,15 +1,8 @@
 /*
   Arduino Webserver using ESP8266
-  Displays temperature in a webpage
-
-  Arduino Mega has three Serial communication ports,this code works well with
-  Arduino Mega.For UNO users,use Softserial library to connect ESP8266 with
-  Arduino UNO
-  If you're unsure about your Arduino model or its pin cofigurations,please check
-  the documentation at http://www.arduino.cc
-
   modified August 2016
   By Joyson Chinta and Gladson Kujur
+  UA9AGR  2021
 */
 
 #define DEBUG false
@@ -52,8 +45,8 @@ void setup()
 {
   //Serial.begin(9600);    ///////For Serial monitor
   Serial.begin(115200); ///////ESP Baud rate
-  //  pinMode(11,OUTPUT);    /////used if connecting a LED to pin 11
-  //  digitalWrite(11,LOW);
+    pinMode(LED_BUILTIN,OUTPUT);    /////used if connecting a LED 
+    digitalWrite(LED_BUILTIN,1);
 
   sendData("AT+RST\r\n", 2000, DEBUG); // reset module
   sendData("AT+CWMODE=2\r\n", 1000, DEBUG); // configure as access point
@@ -86,6 +79,7 @@ void loop()
         pinNumber += (Serial.read() - 48);
         digitalWrite(pinNumber, !digitalRead(pinNumber));
       }
+      
     }
     /////////////////////Sending data to browser
     else
@@ -93,6 +87,9 @@ void loop()
       String webpage = "<h1>PIN states:</h1>";
       espsend(webpage);
     }
+
+
+    
 
 
     String add1 = "<h4>FWD (a3)= </h4>";
@@ -116,6 +113,5 @@ void loop()
 }
 
 //////////////////////////////sends data from ESP to webpage///////////////////////////
-
 
 
