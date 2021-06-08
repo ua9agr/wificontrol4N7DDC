@@ -5,19 +5,23 @@
   UA9AGR  2021
 */
 
-#define DEBUG false
+#define DEBUG true
+
+#include <SoftwareSerial.h>
+
+SoftwareSerial espSerial(2, 3); // RX, TX
 
 //////////////gets the data from esp and displays in serial monitor///////////////////////
 String sendData(String command, const int timeout, boolean debug)
 {
   String response = "";
-  Serial.print(command);
+  espSerial.print(command);
   long int time = millis();
   while ( (time + timeout) > millis())
   {
-    while (Serial.available())
+    while (espSerial.available())
     {
-      char c = Serial.read(); // read the next character.
+      char c = espSerial.read(); // read the next character.
       response += c;
     }
   }
@@ -43,8 +47,9 @@ void espsend(String d)
 
 void setup()
 {
-  //Serial.begin(9600);    ///////For Serial monitor
-  Serial.begin(115200); ///////ESP Baud rate
+  Serial.begin(115200);    ///////For Serial monitor
+  espSerial.begin(115200); ///////ESP Baud rate - soft serial
+  
     pinMode(LED_BUILTIN,OUTPUT);    /////used if connecting a LED 
     digitalWrite(LED_BUILTIN,1);
 
@@ -56,28 +61,22 @@ void setup()
 }
 
 
-float sensetemp() ///////function to sense temperature.
-{
-  int val = analogRead(A0);
-  float mv = ( val / 1024.0) * 5000;
-  float celcius = mv / 10;
-  return (celcius);
-}
-
-
 void loop()
 {
   if (Serial.available())
   {
     /////////////////////Recieving from web browser to toggle led
-    if (Serial.find("+IPD,")) {
+    if (espSerial.find("+IPD,")) {
       delay(300);
-      connectionId = Serial.read() - 48;
-      if (Serial.find("pin=")) {
-        //Serial.println("recieving data from web browser");
+      connectionId = espSerial.read() - 48;
+      if (espSerial.find("pin=")) {
+        Serial.print("recieving URL. id: ");
+        Serial.println(connectionId);
         int pinNumber = (Serial.read() - 48) * 10;
         pinNumber += (Serial.read() - 48);
         digitalWrite(pinNumber, !digitalRead(pinNumber));
+        Serial.print("swithing pin: ");
+        Serial.println(pinNumber);
       }
       
     }
@@ -111,7 +110,4 @@ void loop()
     sendData(closeCommand, 3000, DEBUG);
   }
 }
-
-//////////////////////////////sends data from ESP to webpage///////////////////////////
-
 
